@@ -1,0 +1,30 @@
+### Test 1: Simpan Pelajar Baru
+POST http://localhost:8080/api/students
+Content-Type: application/json
+
+{
+  "fullName": "Cici Lana",
+  "parentPhone": "",
+  "status": "ACTIVE"
+}
+
+###
+
+### Test 2: Lihat Semua Pelajar
+GET http://localhost:8080/api/students
+
+### Daftar Pelajar dengan 3 Subjek
+POST http://localhost:8080/api/students
+Content-Type: application/json
+
+{
+  "fullName": "Zul Ariffin",
+  "parentPhone": "0129993322",
+  "bilanganSubjek": 3,
+  "feePackage": {"id": 1}
+}
+
+###
+
+### Semak Yuran Badrul (ID: 3)
+GET http://localhost:8080/api/students/3/yuran
