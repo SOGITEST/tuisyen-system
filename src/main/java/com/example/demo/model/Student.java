@@ -23,7 +23,7 @@ public class Student {
     private String status;
     
     @Column(name = "tenant_id")
-    private Long tenantId;
+    private Integer tenantId;
 
     @Column(name = "bilangan_subjek")
     private int bilanganSubjek;

@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.CustomUserDetails;
 import com.example.demo.model.Student;
 import com.example.demo.repository.FeePackageRepository;
 import com.example.demo.repository.StudentRepository;
 import com.example.demo.service.StudentService;
 import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,8 +34,13 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard")
-    public String tunjukDashboard(Model model) {
-        List<Student> students = studentService.dapatkanSemuaPelajar();
+    public String tunjukDashboard(Model model, Authentication authentication) {
+        // Ambil Tenant ID dari user yang tengah login
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer tid = userDetails.getTenantId();
+
+        // Hanya ambil pelajar milik cikgu ini
+        List<Student> students = studentService.dapatkanPelajarIkutTenant(tid);
 
         // Kira total yuran menggunakan Java Stream
         double totalKutipan = students.stream()
@@ -50,8 +57,9 @@ public class DashboardController {
 
     // PINDAHKAN KE SINI
     @PostMapping("/dashboard/save")
-    public String saveFromWeb(@ModelAttribute Student student) {
-        studentService.daftarPelajarBaru(student);
+    public String saveFromWeb(@ModelAttribute Student student, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        studentService.daftarPelajarBaru(student, userDetails.getTenantId());
         return "redirect:/dashboard"; // Sekarang Spring @Controller akan faham ini adalah arahan lompat page
     }
 

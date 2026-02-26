@@ -18,7 +18,8 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
-    public Student daftarPelajarBaru(Student student) {
+    public Student daftarPelajarBaru(Student student, Integer tenantId) {
+        student.setTenantId(tenantId);
         // LOGIK BISNES:
         // Contoh: Secara automatik letak status 'PENDING' jika telefon ibu bapa kosong
         if (student.getParentPhone() == null || student.getParentPhone().isEmpty()) {
@@ -38,5 +39,9 @@ public class StudentService {
 
     public void padamPelajar(Long id) {
         studentRepository.deleteById(id);
+    }
+
+    public List<Student> dapatkanPelajarIkutTenant(Integer tenantId){
+        return studentRepository.findByTenantId(tenantId);
     }
 }

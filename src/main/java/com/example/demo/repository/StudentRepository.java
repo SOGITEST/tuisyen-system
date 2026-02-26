@@ -4,7 +4,10 @@ import com.example.demo.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
-    // Tiada kod perlu ditulis di sini buat masa sekarang!
+    // Cari senarai pelajar mengikut ID cikgu/tenant
+    List<Student> findByTenantId(Integer tenantId);
 }
