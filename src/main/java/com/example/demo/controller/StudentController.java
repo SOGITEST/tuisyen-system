@@ -45,28 +45,4 @@ public class StudentController {
         studentService.daftarPelajarBaru(student, tenentId);
         return "redirect:/dashboard"; // Selepas simpan, pergi balik ke dashboard
     }
-
-    @GetMapping("/students")
-    public String listStudents(Model model, Authentication authentication) {
-        // 1. Ambil maklumat cikgu yang sedang login
-        CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
-        Integer tenantId = currentUser.getTenantId();
-
-        // 2. Tarik pelajar yang mempunyai tenantId yang sama sahaja
-        List<Student> students = studentService.dapatkanPelajarIkutTenant(tenantId);
-
-        model.addAttribute("students", students);
-        return "student-list";
-    }
-
-    @GetMapping("/dashboard")
-    public String viewDashboard(Model model, Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        // Hanya tarik pelajar milik cikgu ini sahaja
-        List<Student> students = studentService.dapatkanPelajarIkutTenant(userDetails.getTenantId());
-
-        model.addAttribute("pelajarList", students);
-        return "dashboard";
-    }
 }

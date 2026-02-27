@@ -35,17 +35,24 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String tunjukDashboard(Model model, Authentication authentication) {
+        // 1. Safety check: Kalau tak login, hantar ke login page
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            return "redirect:/login";
+        }
         // Ambil Tenant ID dari user yang tengah login
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Integer tid = userDetails.getTenantId();
+        // 2. Pastikan tid tak null
+        if (tid == null) {
+            // Log ralat atau beri nilai default 0
+            tid = 0;
+        }
 
         // Hanya ambil pelajar milik cikgu ini
         List<Student> students = studentService.dapatkanPelajarIkutTenant(tid);
 
         // Kira total yuran menggunakan Java Stream
-        double totalKutipan = students.stream()
-                .mapToDouble(Student::getJumlahYuran)
-                .sum();
+        double totalKutipan = students.stream().mapToDouble(Student::getJumlahYuran).sum();
 
         model.addAttribute("listStudents", students);
         model.addAttribute("totalPelajar", students.size());
@@ -76,6 +83,11 @@ public class DashboardController {
     @GetMapping("/dashboard/delete/{id}")
     public String deleteStudent(@PathVariable Long id) {
         studentService.padamPelajar(id);
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/")
+    public String index() {
         return "redirect:/dashboard";
     }
 }
