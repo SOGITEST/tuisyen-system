@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.print.attribute.standard.ColorSupported;
 import java.util.List;
 
 @Controller
@@ -71,18 +72,49 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/edit/{id}")
-    public String editStudent(@PathVariable Long id, Model model) {
+    public String editStudent(@PathVariable Long id, Model model, Authentication authentication) {
+        // 1. Safety Check
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            return "redirect:/login";
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer tid = userDetails.getTenantId();
+
+        // 2. Cari pelajar, tapi pastikan dia milik Tenant ID yang betul;
         Student s = studentRepository.findById(id).orElseThrow();
 
+        // Check keselamatan: Kalau cikgu cuba edit pelajar orang lain
+        if (!s.getTenantId().equals(tid)) {
+            return "redirect:/dashboard?error=anauthorized";
+        }
+
+        // 3. Hantar data ke model (Pastikan senarai pelajar juga ditapis!)
+        List<Student> students = studentService.dapatkanPelajarIkutTenant(tid);
+        double totalKutipan = students.stream().mapToDouble(Student::getJumlahYuran).sum();
+
         model.addAttribute("newStudent", s); // Kita hantar data pelajar lama ke dalam form
-        model.addAttribute("listStudents", studentService.dapatkanSemuaPelajar());
+        model.addAttribute("listStudents", students);
+        model.addAttribute("totalPelajar", students.size());
+        model.addAttribute("totalKutipan", totalKutipan);
         model.addAttribute("listPackages", feePackageRepository.findAll());
         return "index";
     }
 
     @GetMapping("/dashboard/delete/{id}")
-    public String deleteStudent(@PathVariable Long id) {
-        studentService.padamPelajar(id);
+    public String deleteStudent(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)){
+            return "redirect:/login";
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        // Sebelum delete, check dulu owner
+        Student s = studentRepository.findById(id).orElseThrow();
+        if (s.getTenantId().equals(userDetails.getTenantId())){
+            studentService.padamPelajar(id);
+        }
+
         return "redirect:/dashboard";
     }
 
