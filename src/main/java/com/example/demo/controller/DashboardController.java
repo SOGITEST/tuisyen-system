@@ -66,8 +66,16 @@ public class DashboardController {
     // PINDAHKAN KE SINI
     @PostMapping("/dashboard/save")
     public String saveFromWeb(@ModelAttribute Student student, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
+            return "redirect:/login";
+        }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        studentService.daftarPelajarBaru(student, userDetails.getTenantId());
+
+        // Pastikan pelajar ini sentiasa diikat dengan tenantId cikgu yang tengah login
+        // Walaupun dia baru atau edit, tenantId takkan hilang
+        student.setTenantId(userDetails.getTenantId());
+
+        studentRepository.save(student); // Terus save kat sini atau guna service
         return "redirect:/dashboard"; // Sekarang Spring @Controller akan faham ini adalah arahan lompat page
     }
 

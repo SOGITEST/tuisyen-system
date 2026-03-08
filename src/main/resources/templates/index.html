@@ -45,7 +45,7 @@
     <div class="row">
         <div class="col-lg-4 mb-4">
             <div class="card p-4">
-                <h5 class="card-title mb-4"><i class="bi bi-person-plus-fill me-2"></i>Daftar Pelajar</h5>
+                <h5 class="card-title mb-4"><i class="bi bi-person-plus-fill me-2"></i><span th:text="${newStudent.id == null ? 'Daftar Pelajar' : 'Kemaskini Pelajar'}">Daftar</span></h5>
                 <form th:action="@{/dashboard/save}" th:object="${newStudent}" method="POST">
                     <input type="hidden" th:field="*{id}">
                     <div class="mb-3">
